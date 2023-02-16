@@ -412,7 +412,7 @@ class vars:
     newlinemode = "ns"
     quiet       = False # If set will suppress any story text from being printed to the console (will only be seen on the client web page)
     debug       = False # If set to true, will send debug information to the client for display
-    lazy_load   = True  # Whether or not to use torch_lazy_loader.py for transformers models in order to reduce CPU memory usage
+    lazy_load   = False  # Whether or not to use torch_lazy_loader.py for transformers models in order to reduce CPU memory usage
     use_colab_tpu = os.environ.get("COLAB_TPU_ADDR", "") != "" or os.environ.get("TPU_NAME", "") != ""  # Whether or not we're in a Colab TPU instance or Kaggle TPU instance and are going to use the TPU rather than the CPU
     revision    = None
     standalone = False
@@ -424,7 +424,8 @@ class vars:
     token_stream_queue = TokenStreamQueue() # Queue for the token streaming
     show_probs = False # Whether or not to show token probabilities
     show_budget = False # Whether or not to show token probabilities
-    configname = None
+    
+
 
 utils.vars = vars
 
@@ -2114,7 +2115,7 @@ def reset_model_settings():
     vars.sampler_order = [6, 0, 1, 2, 3, 4, 5]
     vars.newlinemode = "n"
     vars.revision    = None
-    vars.lazy_load = True
+    vars.lazy_load = False
     
 
 def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=False, online_model="", use_breakmodel_args=False, breakmodel_args_default_to_cpu=False):
@@ -2568,7 +2569,7 @@ def load_model(use_gpu=True, gpu_layers=None, disk_layers=None, initial_load=Fal
                                 except Exception as e:
                                     tokenizer = GPT2Tokenizer.from_pretrained("gpt2", revision=args.revision, cache_dir="cache")
                         try:
-                            model     = AutoModelForCausalLM.from_pretrained("models/{}".format(vars.model.replace('/', '_')), revision=args.revision, cache_dir="cache", **lowmem)
+                            model     = AutoModelForCausalLM.from_pretrained("models/{}".format(vars.model.replace('/', '_')), load_in_8bit=True, device_map ="auto", revision=args.revision, cache_dir="cache", **lowmem)
                         except Exception as e:
                             if("out of memory" in traceback.format_exc().lower()):
                                 raise RuntimeError("One of your GPUs ran out of memory when KoboldAI tried to load your model.")
